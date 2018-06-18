@@ -1,0 +1,22 @@
+[[source]]
+
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+
+[packages]
+
+plover = ">=4.0.0.dev8"
+aiohttp = "*"
+
+
+[dev-packages]
+
+pylint = "*"
+pytest = "*"
+
+
+[requires]
+
+python_version = "3.6"
