@@ -11,7 +11,8 @@ async def main():
 
     async with session.ws_connect(URL) as socket:
         async for message in socket:
-            if message.type in (aiohttp.WSMsgType.CLOSED, aiohttp.WSMsgType.ERROR):
+            if message.type in (aiohttp.WSMsgType.CLOSE, aiohttp.WSMsgType.CLOSING,
+                                aiohttp.WSMsgType.CLOSED, aiohttp.WSMsgType.ERROR):
                 break
 
             print('data: ', message.data)
