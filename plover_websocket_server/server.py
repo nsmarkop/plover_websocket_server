@@ -68,6 +68,11 @@ class WebSocketServer(Thread):
         :param data: The data in JSON format to broadcast.
         '''
 
+        # Don't queue a message if we don't have a server running. This can happen
+        # when hooks connect before the server thread has finished starting
+        if not self._app:
+            return
+
         asyncio.run_coroutine_threadsafe(self._broadcast_message(data), self._app.loop)
 
     def queue_stop(self):
@@ -75,6 +80,11 @@ class WebSocketServer(Thread):
         Queues the server to stop.
         Assumes it is being called from a thread different from the event loop.
         '''
+
+        # Don't try to stop the server if we don't have a server running.
+        # This should never happen, but...
+        if not self._app:
+            return
 
         asyncio.run_coroutine_threadsafe(self._stop(), self._app.loop)
 
