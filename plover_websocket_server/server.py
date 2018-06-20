@@ -36,10 +36,6 @@ class WebSocketServer(Thread):
         self._host = host
         self._port = port
 
-        # Make a new event loop, but make sure we don't set it
-        # as the event loop until we're in the thread process
-        self._loop = asyncio.new_event_loop()
-
         self.status = ServerStatus.Stopped
 
     def _start(self):
@@ -50,14 +46,16 @@ class WebSocketServer(Thread):
         if self.status == ServerStatus.Running:
             raise AssertionError(ERROR_SERVER_RUNNING)
 
-        # We're in the thread process so it's safe to set
-        # our event loop to the one we created now
-        asyncio.set_event_loop(self._loop)
+        # We're in the thread process so it's safe to set our event
+        # loop to a new one that we're creating now
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
 
         self._app = web.Application()
         self._app['websockets'] = []
 
         setup_routes(self._app)
+        self._app.on_shutdown.append(self._on_server_shutdown)
 
         self.status = ServerStatus.Running
         web.run_app(self._app, host=self._host, port=self._port)
@@ -88,19 +86,20 @@ class WebSocketServer(Thread):
         if self.status != ServerStatus.Running:
             raise AssertionError(ERROR_NO_SERVER)
 
-        self._app.on_shutdown.append(self._on_server_shutdown)
+        self._app.loop.stop()
+
         await self._app.shutdown()
         await self._app.cleanup()
 
         self._app = None
         self.status = ServerStatus.Stopped
 
-    async def _on_server_shutdown(self):
+    async def _on_server_shutdown(self, app: web.Application):
         '''
         Handles pre-shutdown behavior for the server.
         '''
 
-        for socket in self._app.get('websockets', []):
+        for socket in app.get('websockets', []):
             await socket.close(code=WSCloseCode.GOING_AWAY,
                                message='Server shutdown')
 

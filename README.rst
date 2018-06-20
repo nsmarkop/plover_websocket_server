@@ -7,16 +7,9 @@ A WebSocket server for exposing
 This is currently under development and has the following known issues /
 limitations:
 
--  The server doesn’t actually shut down when disabling the extension
-   via the GUI and will only stop once Plover is completely closed.
--  The server doesn’t handle disabling / enabling again properly
--  There are probably some issues with threads; I just create them and
-   don’t care about / join them later currently
 -  The host and port are not currently configurable and will always try
    to be on localhost:8086
--  Various unintended exceptions get logged when sending socket data at
-   the moment, though they don’t seem to have a functional impact?
-   Probably due to certain data not properly mapping to JSON for sending
+-  Client connections may not be gracefully closed
 
 Installation
 ------------

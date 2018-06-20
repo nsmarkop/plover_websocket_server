@@ -44,8 +44,8 @@ class WebSocketServerManager():
         self._disconnect_hooks()
 
         self._server.queue_stop()
-        # TODO: self._server.join()
-        # TODO: self._server = None
+        self._server.join()
+        self._server = None
 
     def get_server_status(self) -> ServerStatus:
         '''
