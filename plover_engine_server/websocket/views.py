@@ -1,38 +1,39 @@
+"""The views / handlers for the server."""
+
 from aiohttp import web, WSMsgType
 
 
 async def index(request: web.Request) -> web.Response:
-    '''
-    Index endpoint for the server. Not really needed.
+    """Index endpoint for the server. Not really needed.
 
-    :param request: The request from the client.
-    '''
+    Args:
+        request: The request from the client.
+    """
 
     return web.Response(text='index')
 
+
 async def websocket_handler(request: web.Request) -> web.WebSocketResponse:
-    '''
-    The main WebSocket handler.
+    """The main WebSocket handler.
 
-    :param request: The request from the client.
-    '''
+    Args:
+        request: The request from the client.
+    """
 
-    print('WebSocket connection starting')
+    print('WebSocket connection starting', flush=True)
     socket = web.WebSocketResponse()
     await socket.prepare(request)
     request.app['websockets'].append(socket)
-    print('WebSocket connection ready')
+    print('WebSocket connection ready', flush=True)
 
     async for message in socket:
-        print(message)
         if message.type == WSMsgType.TEXT:
-            print(message.data)
-
             if message.data == 'close':
                 await socket.close()
         elif message.type == WSMsgType.ERROR:
-            print(f'WebSocket connection closed with exception {socket.exception()}')
+            print('WebSocket connection closed with exception '
+                  f'{socket.exception()}', flush=True)
 
     request.app['websockets'].remove(socket)
-    print('WebSocket connection closed')
+    print('WebSocket connection closed', flush=True)
     return socket
