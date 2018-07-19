@@ -2,6 +2,9 @@
 
 from typing import Optional, List
 import os
+import json
+
+import jsonpickle
 
 from plover.engine import StenoEngine
 from plover.steno import Stroke
@@ -104,10 +107,9 @@ class EngineServerManager():
             stroke: The stroke that was just performed.
         """
 
-        data = {'stroked': {
-            'stroke': stroke.rtfcre,
-            'keys': stroke.steno_keys
-        }}
+        stroke_json = jsonpickle.encode(stroke, unpicklable=False)
+
+        data = {'stroked': json.loads(stroke_json)}
         self._server.queue_message(data)
 
     def _on_translated(self, old: List[_Action], new: List[_Action]):
@@ -118,12 +120,15 @@ class EngineServerManager():
             new: A list of the new actions for the current translation.
         """
 
-        # TODO: Need to do more than a string conversion eventually
+        old_json = jsonpickle.encode(old, unpicklable=False)
+        new_json = jsonpickle.encode(new, unpicklable=False)
+
         data = {
             'translated': {
-                'old': str(old),
-                'new': str(new)
-            }}
+                'old': json.loads(old_json),
+                'new': json.loads(new_json)
+            }
+        }
         self._server.queue_message(data)
 
     def _on_machine_state_changed(self, machine_type: str, machine_state: str):
@@ -139,7 +144,8 @@ class EngineServerManager():
             'machine_state_changed': {
                 'machine_type': machine_type,
                 'machine_state': machine_state
-            }}
+            }
+        }
         self._server.queue_message(data)
 
     def _on_output_changed(self, enabled: bool):
@@ -160,9 +166,9 @@ class EngineServerManager():
                 part of the configuration that was updated.
         """
 
-        # TODO: This is probably not sufficient for all cases and some
-        #       converting of the data for sending has to happen?
-        data = {'config_changed': config_update}
+        config_json = jsonpickle.encode(config_update, unpicklable=False)
+
+        data = {'config_changed': json.loads(config_json)}
         self._server.queue_message(data)
 
     def _on_dictionaries_loaded(self, dictionaries: StenoDictionaryCollection):
@@ -172,8 +178,9 @@ class EngineServerManager():
             dictionaries: A collection of the dictionaries that loaded.
         """
 
-        # TODO: Need to do more than a string conversion eventually
-        data = {'dictionaries_loaded': str(dictionaries)}
+        dictionaries_json = jsonpickle.encode(dictionaries, unpicklable=False)
+
+        data = {'dictionaries_loaded': json.loads(dictionaries_json)}
         self._server.queue_message(data)
 
     def _on_send_string(self, text: str):

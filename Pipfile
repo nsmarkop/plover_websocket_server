@@ -9,6 +9,7 @@ name = "pypi"
 
 plover = ">=4.0.0.dev8"
 aiohttp = "*"
+jsonpickle = "*"
 
 
 [dev-packages]
